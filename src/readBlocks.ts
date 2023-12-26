@@ -11,7 +11,7 @@ export const readUint8: IReadBlockFixed<number> = {
   read: (buf, pos) => buf.readByte(pos),
 };
 
-export const readUint16: IReadBlockFixed<number> = {
+export const readUint16BigEndian: IReadBlockFixed<number> = {
   size: 2,
   read: (buf, pos) => {
     const a = buf.readByte(pos);
@@ -20,7 +20,18 @@ export const readUint16: IReadBlockFixed<number> = {
   },
 };
 
-export const readUint32: IReadBlockFixed<number> = {
+export const readUint16SmallEndian: IReadBlockFixed<number> = {
+  size: 2,
+  read: (buf, pos) => {
+    const a = buf.readByte(pos);
+    const b = buf.readByte(pos + 1);
+    return (b << 8) | a;
+  },
+};
+
+export const readUint16 = readUint16BigEndian;
+
+export const readUint32BigEndian: IReadBlockFixed<number> = {
   size: 4,
   read: (buf, pos) => {
     const a = buf.readByte(pos);
@@ -30,6 +41,19 @@ export const readUint32: IReadBlockFixed<number> = {
     return (a << 24) | (b << 16) | (c << 8) | d;
   },
 };
+
+export const readUint32SmallEndian: IReadBlockFixed<number> = {
+  size: 4,
+  read: (buf, pos) => {
+    const a = buf.readByte(pos);
+    const b = buf.readByte(pos + 1);
+    const c = buf.readByte(pos + 2);
+    const d = buf.readByte(pos + 3);
+    return (d << 24) | (c << 16) | (b << 8) | a;
+  },
+};
+
+export const readUint32 = readUint32BigEndian;
 
 export const readFloat64: IReadBlockFixed<number> = {
   size: 8,

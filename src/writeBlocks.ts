@@ -13,7 +13,7 @@ export const writeUint8: IWriteBlockFixed<number> = {
   },
 };
 
-export const writeUint16: IWriteBlockFixed<number> = {
+export const writeUint16BigEndian: IWriteBlockFixed<number> = {
   size: 2,
   write: (buf, pos, val) => {
     buf.writeByte(pos, (val >> 8) & 0xff);
@@ -21,7 +21,17 @@ export const writeUint16: IWriteBlockFixed<number> = {
   },
 };
 
-export const writeUint32: IWriteBlockFixed<number> = {
+export const writeUint16SmallEndian: IWriteBlockFixed<number> = {
+  size: 2,
+  write: (buf, pos, val) => {
+    buf.writeByte(pos, val & 0xff);
+    buf.writeByte(pos + 1, (val >> 8) & 0xff);
+  },
+};
+
+export const writeUint16 = writeUint16BigEndian;
+
+export const writeUint32BigEndian: IWriteBlockFixed<number> = {
   size: 4,
   write: (buf, pos, val) => {
     buf.writeByte(pos, (val >> 24) & 0xff);
@@ -30,6 +40,18 @@ export const writeUint32: IWriteBlockFixed<number> = {
     buf.writeByte(pos + 3, val & 0xff);
   },
 };
+
+export const writeUint32SmallEndian: IWriteBlockFixed<number> = {
+  size: 4,
+  write: (buf, pos, val) => {
+    buf.writeByte(pos, val & 0xff);
+    buf.writeByte(pos + 1, (val >> 8) & 0xff);
+    buf.writeByte(pos + 2, (val >> 16) & 0xff);
+    buf.writeByte(pos + 3, (val >> 24) & 0xff);
+  },
+};
+
+export const writeUint32 = writeUint32BigEndian;
 
 export const writeFloat64: IWriteBlockFixed<number> = {
   size: 8,
