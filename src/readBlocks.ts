@@ -4,6 +4,8 @@ import type { IReadBlock, IReadBlockFixed, IReadBlockVariable } from './types';
 const tmpbuf = new ArrayBuffer(8);
 const f64arr = new Float64Array(tmpbuf);
 const u8arr = new Uint8Array(tmpbuf);
+const u16arr = new Uint16Array(tmpbuf);
+const u32arr = new Uint32Array(tmpbuf);
 const decoder = new TextDecoder();
 
 export const readUint8: IReadBlockFixed<number> = {
@@ -11,49 +13,25 @@ export const readUint8: IReadBlockFixed<number> = {
   read: (buf, pos) => buf.readByte(pos),
 };
 
-export const readUint16BigEndian: IReadBlockFixed<number> = {
+export const readUint16: IReadBlockFixed<number> = {
   size: 2,
   read: (buf, pos) => {
-    const a = buf.readByte(pos);
-    const b = buf.readByte(pos + 1);
-    return (a << 8) | b;
+    u8arr[0] = buf.readByte(pos);
+    u8arr[1] = buf.readByte(pos + 1);
+    return u16arr[0];
   },
 };
 
-export const readUint16SmallEndian: IReadBlockFixed<number> = {
-  size: 2,
-  read: (buf, pos) => {
-    const a = buf.readByte(pos);
-    const b = buf.readByte(pos + 1);
-    return (b << 8) | a;
-  },
-};
-
-export const readUint16 = readUint16BigEndian;
-
-export const readUint32BigEndian: IReadBlockFixed<number> = {
+export const readUint32: IReadBlockFixed<number> = {
   size: 4,
   read: (buf, pos) => {
-    const a = buf.readByte(pos);
-    const b = buf.readByte(pos + 1);
-    const c = buf.readByte(pos + 2);
-    const d = buf.readByte(pos + 3);
-    return (a << 24) | (b << 16) | (c << 8) | d;
+    u8arr[0] = buf.readByte(pos);
+    u8arr[1] = buf.readByte(pos + 1);
+    u8arr[2] = buf.readByte(pos + 2);
+    u8arr[3] = buf.readByte(pos + 3);
+    return u32arr[0];
   },
 };
-
-export const readUint32SmallEndian: IReadBlockFixed<number> = {
-  size: 4,
-  read: (buf, pos) => {
-    const a = buf.readByte(pos);
-    const b = buf.readByte(pos + 1);
-    const c = buf.readByte(pos + 2);
-    const d = buf.readByte(pos + 3);
-    return (d << 24) | (c << 16) | (b << 8) | a;
-  },
-};
-
-export const readUint32 = readUint32BigEndian;
 
 export const readFloat64: IReadBlockFixed<number> = {
   size: 8,

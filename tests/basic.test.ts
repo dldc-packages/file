@@ -22,7 +22,7 @@ test('simple file', () => {
   file.write(writeEncodedString, 'hello world');
 
   const buffer = file.getArrayBuffer();
-  expect(toHex(buffer)).toEqual(['0b260c0c', '6c6c6568', '6f77206f', '72', '6c', '64']);
+  expect(toHex(buffer)).toEqual(['0b0c260c', '6c6c6568', '6f77206f', '72', '6c', '64']);
 
   const file2 = reader(buffer);
   const a = file2.read(readUint8);
@@ -41,7 +41,7 @@ test('sequence', () => {
   const writeFile = writer();
   writeFile.write(writeBlock, [12, 3110, 'hello world', [1, 2, 3, 4, 5]]);
   const buffer = writeFile.getArrayBuffer();
-  expect(toHex(buffer)).toEqual(['0b260c0c', '6c6c6568', '6f77206f', '00646c72', '03020105', '04', '05']);
+  expect(toHex(buffer)).toEqual(['0b0c260c', '6c6c6568', '6f77206f', '05646c72', '03020100', '04', '05']);
 
   const readFile = reader(buffer);
   const [a, b, c, d] = readFile.read(readBlock);
