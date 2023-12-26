@@ -1,6 +1,6 @@
 {
   "name": "@dldc/file",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "A tool to build custom files format and manipumate buffers",
   "keywords": [
     "buffer",
