@@ -1,6 +1,6 @@
 # File
 
-> A tool to build custom files format and manipumate buffers
+> A tool to build custom files format and manipulate buffers
 
 ## Installation
 
