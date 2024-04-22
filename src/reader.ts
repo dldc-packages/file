@@ -1,5 +1,5 @@
 import { BufferFacade } from './bufferFacade';
-import { FileErreur } from './errors';
+import { throwExpectedEof, throwUnexpectedEof } from './erreur';
 import { resolveReadSize } from './readBlocks';
 import type { IReadBlock } from './types';
 
@@ -28,13 +28,13 @@ export function reader(data: ArrayBuffer): IFileParser {
 
   function readEof() {
     if (offset !== buffer.byteLength) {
-      throw FileErreur.ExpectedEof();
+      return throwExpectedEof();
     }
   }
 
   function ensureRead(size: number) {
     if (offset + size > buffer.byteLength) {
-      throw FileErreur.UnexpectedEof();
+      return throwUnexpectedEof();
     }
   }
 }
