@@ -1,5 +1,11 @@
-import type { IWriteBlock, IWriteBlockFixed, IWriteBlockVariable } from './types';
-import { calcStringSize } from './utils/strings';
+// deno-lint-ignore-file no-explicit-any
+
+import type {
+  IWriteBlock,
+  IWriteBlockFixed,
+  IWriteBlockVariable,
+} from "./types.ts";
+import { calcStringSize } from "./utils/strings.ts";
 
 const tmpbuf = new ArrayBuffer(8);
 const f64arr = new Float64Array(tmpbuf);
@@ -51,11 +57,14 @@ export function writeBufferFixed(size: number): IWriteBlockFixed<Uint8Array> {
   };
 }
 
-export const writeEncodedBoolean: IWriteBlockFixed<boolean> = transformFixedWrite(writeUint8, (val) => Number(val));
+export const writeEncodedBoolean: IWriteBlockFixed<boolean> =
+  transformFixedWrite(writeUint8, (val) => Number(val));
 
 export const writeEncodedUint: IWriteBlockVariable<number> = {
   size: (val) => {
-    return val < 254 ? writeUint8.size : writeUint8.size + (val < 65536 ? writeUint16.size : writeUint32.size);
+    return val < 254
+      ? writeUint8.size
+      : writeUint8.size + (val < 65536 ? writeUint16.size : writeUint32.size);
   },
   write(buf, pos, val) {
     if (val < 254) {
@@ -105,19 +114,29 @@ export const writeEncodedString: IWriteBlockVariable<string> = {
   },
 };
 
-export function writeArrayOf<T>(itemBlock: IWriteBlock<T>): IWriteBlock<Array<T>> {
-  return transformWrite(seqWrite(writeUint16, writeMany(itemBlock)), (arr): [number, Array<T>] => [arr.length, arr]);
+export function writeArrayOf<T>(
+  itemBlock: IWriteBlock<T>,
+): IWriteBlock<Array<T>> {
+  return transformWrite(
+    seqWrite(writeUint16, writeMany(itemBlock)),
+    (arr): [number, Array<T>] => [arr.length, arr],
+  );
 }
 
-export function dynamicWrite<Value>(getBlock: (val: Value) => IWriteBlock<Value>): IWriteBlock<Value> {
+export function dynamicWrite<Value>(
+  getBlock: (val: Value) => IWriteBlock<Value>,
+): IWriteBlock<Value> {
   return {
     size: (val) => resolveWriteSize(getBlock(val), val),
     write: (buf, pos, val) => getBlock(val).write(buf, pos, val),
   };
 }
 
-export function resolveWriteSize<Value>(block: IWriteBlock<Value>, value: Value): number {
-  return typeof block.size === 'number' ? block.size : block.size(value);
+export function resolveWriteSize<Value>(
+  block: IWriteBlock<Value>,
+  value: Value,
+): number {
+  return typeof block.size === "number" ? block.size : block.size(value);
 }
 
 export function transformFixedWrite<Inner, Outer>(
@@ -131,9 +150,12 @@ export function transformFixedWrite<Inner, Outer>(
   };
 }
 
-function transformWrite<Inner, Outer>(block: IWriteBlock<Inner>, transform: (val: Outer) => Inner): IWriteBlock<Outer> {
+function transformWrite<Inner, Outer>(
+  block: IWriteBlock<Inner>,
+  transform: (val: Outer) => Inner,
+): IWriteBlock<Outer> {
   const size = block.size;
-  if (typeof size === 'number') {
+  if (typeof size === "number") {
     return {
       size,
       write: (buf, pos, val) => block.write(buf, pos, transform(val)),
@@ -148,20 +170,42 @@ function transformWrite<Inner, Outer>(block: IWriteBlock<Inner>, transform: (val
 // prettier-ignore
 export function seqWrite<V1>(b1: IWriteBlock<V1>): IWriteBlockVariable<[V1]>;
 // prettier-ignore
-export function seqWrite<V1, V2>(b1: IWriteBlock<V1>, b2: IWriteBlock<V2>): IWriteBlockVariable<[V1, V2]>;
+export function seqWrite<V1, V2>(
+  b1: IWriteBlock<V1>,
+  b2: IWriteBlock<V2>,
+): IWriteBlockVariable<[V1, V2]>;
 // prettier-ignore
-export function seqWrite<V1, V2, V3>(b1: IWriteBlock<V1>, b2: IWriteBlock<V2>, b3: IWriteBlock<V3>): IWriteBlockVariable<[V1, V2, V3]>;
+export function seqWrite<V1, V2, V3>(
+  b1: IWriteBlock<V1>,
+  b2: IWriteBlock<V2>,
+  b3: IWriteBlock<V3>,
+): IWriteBlockVariable<[V1, V2, V3]>;
 // prettier-ignore
-export function seqWrite<V1, V2, V3, V4>(b1: IWriteBlock<V1>, b2: IWriteBlock<V2>, b3: IWriteBlock<V3>, b4: IWriteBlock<V4>): IWriteBlockVariable<[V1, V2, V3, V4]>;
+export function seqWrite<V1, V2, V3, V4>(
+  b1: IWriteBlock<V1>,
+  b2: IWriteBlock<V2>,
+  b3: IWriteBlock<V3>,
+  b4: IWriteBlock<V4>,
+): IWriteBlockVariable<[V1, V2, V3, V4]>;
 // prettier-ignore
-export function seqWrite<V1, V2, V3, V4, V5>(b1: IWriteBlock<V1>, b2: IWriteBlock<V2>, b3: IWriteBlock<V3>, b4: IWriteBlock<V4>, b5: IWriteBlock<V5>): IWriteBlockVariable<[V1, V2, V3, V4, V5]>;
+export function seqWrite<V1, V2, V3, V4, V5>(
+  b1: IWriteBlock<V1>,
+  b2: IWriteBlock<V2>,
+  b3: IWriteBlock<V3>,
+  b4: IWriteBlock<V4>,
+  b5: IWriteBlock<V5>,
+): IWriteBlockVariable<[V1, V2, V3, V4, V5]>;
 // prettier-ignore
-export function seqWrite(...items: Array<IWriteBlock<any>>): IWriteBlockVariable<Array<any>>;
-export function seqWrite(...items: Array<IWriteBlock<any>>): IWriteBlockVariable<any> {
+export function seqWrite(
+  ...items: Array<IWriteBlock<any>>
+): IWriteBlockVariable<Array<any>>;
+export function seqWrite(
+  ...items: Array<IWriteBlock<any>>
+): IWriteBlockVariable<any> {
   return {
     size(val) {
       if (val.length !== items.length) {
-        throw new Error('Invalid seq array length');
+        throw new Error("Invalid seq array length");
       }
       let size = 0;
       items.forEach((item, index) => {
@@ -171,7 +215,7 @@ export function seqWrite(...items: Array<IWriteBlock<any>>): IWriteBlockVariable
     },
     write(buf, pos, val) {
       if (val.length !== items.length) {
-        throw new Error('Invalid seq array length');
+        throw new Error("Invalid seq array length");
       }
       let offset = pos;
       items.forEach((item, index) => {
@@ -183,7 +227,9 @@ export function seqWrite(...items: Array<IWriteBlock<any>>): IWriteBlockVariable
   };
 }
 
-export function writeMany<Value>(block: IWriteBlock<Value>): IWriteBlockVariable<Array<Value>> {
+export function writeMany<Value>(
+  block: IWriteBlock<Value>,
+): IWriteBlockVariable<Array<Value>> {
   return {
     size(vals) {
       let size = 0;

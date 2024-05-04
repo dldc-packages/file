@@ -1,4 +1,4 @@
-import type { BufferFacade } from './bufferFacade';
+import type { BufferFacade } from "./bufferFacade.ts";
 
 export type IReadBlockFixed<Value> = {
   readonly size: number;
@@ -20,9 +20,13 @@ export type IWriteBlockFixed<Value> = {
   readonly write: (buffer: BufferFacade, offset: number, value: Value) => void;
 };
 
-export type IReadBlock<Value> = IReadBlockFixed<Value> | IReadBlockVariable<Value>;
+export type IReadBlock<Value> =
+  | IReadBlockFixed<Value>
+  | IReadBlockVariable<Value>;
 
-export type IWriteBlock<Value> = IWriteBlockFixed<Value> | IWriteBlockVariable<Value>;
+export type IWriteBlock<Value> =
+  | IWriteBlockFixed<Value>
+  | IWriteBlockVariable<Value>;
 
 export type IBlockFixed<RValue, WValue = RValue> = {
   reader: IReadBlockFixed<RValue>;

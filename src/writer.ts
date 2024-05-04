@@ -1,6 +1,6 @@
-import { BufferFacade } from './bufferFacade';
-import type { IWriteBlock } from './types';
-import { resolveWriteSize } from './writeBlocks';
+import { BufferFacade } from "./bufferFacade.ts";
+import type { IWriteBlock } from "./types.ts";
+import { resolveWriteSize } from "./writeBlocks.ts";
 
 export interface IWriter {
   write<Value>(block: IWriteBlock<Value>, value: Value): void;

@@ -1,7 +1,7 @@
-import { BufferFacade } from './bufferFacade';
-import { throwExpectedEof, throwUnexpectedEof } from './erreur';
-import { resolveReadSize } from './readBlocks';
-import type { IReadBlock } from './types';
+import { BufferFacade } from "./bufferFacade.ts";
+import { throwExpectedEof, throwUnexpectedEof } from "./erreur.ts";
+import { resolveReadSize } from "./readBlocks.ts";
+import type { IReadBlock } from "./types.ts";
 
 export interface IFileParser {
   read<Value>(block: IReadBlock<Value>): Value;

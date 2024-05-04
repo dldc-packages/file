@@ -1,5 +1,11 @@
-import type { BufferFacade } from './bufferFacade';
-import type { IReadBlock, IReadBlockFixed, IReadBlockVariable } from './types';
+// deno-lint-ignore-file no-explicit-any
+
+import type { BufferFacade } from "./bufferFacade.ts";
+import type {
+  IReadBlock,
+  IReadBlockFixed,
+  IReadBlockVariable,
+} from "./types.ts";
 
 const tmpbuf = new ArrayBuffer(8);
 const f64arr = new Float64Array(tmpbuf);
@@ -50,12 +56,17 @@ export function readBufferFixed(size: number): IReadBlockFixed<Uint8Array> {
   };
 }
 
-export const readEncodedBoolean: IReadBlockFixed<boolean> = transformFixedRead(readUint8, (v) => v > 0);
+export const readEncodedBoolean: IReadBlockFixed<boolean> = transformFixedRead(
+  readUint8,
+  (v) => v > 0,
+);
 
 export const readEncodedUint: IReadBlockVariable<number> = {
   size(buf, pos) {
     const val = readUint8.read(buf, pos);
-    return val < 254 ? readUint8.size : readUint8.size + (val == 254 ? readUint16.size : readUint32.size);
+    return val < 254
+      ? readUint8.size
+      : readUint8.size + (val == 254 ? readUint16.size : readUint32.size);
   },
   read(buf, pos) {
     const val = readUint8.read(buf, pos);
@@ -92,7 +103,10 @@ export function readFixedString(length: number): IReadBlockFixed<string> {
 export function readArrayOf<T>(itemBlock: IReadBlock<T>): IReadBlock<Array<T>> {
   return dynamicRead((buf, pos) => {
     const length = readUint16.read(buf, pos);
-    return transformRead(seqRead(readUint16, repeatRead(length, itemBlock)), ([_len, items]) => items);
+    return transformRead(
+      seqRead(readUint16, repeatRead(length, itemBlock)),
+      ([_len, items]) => items,
+    );
   });
 }
 
@@ -109,16 +123,38 @@ export function transformFixedRead<Inner, Outer>(
 // prettier-ignore
 export function seqRead<V1>(b1: IReadBlock<V1>): IReadBlockVariable<[V1]>;
 // prettier-ignore
-export function seqRead<V1, V2>(b1: IReadBlock<V1>, b2: IReadBlock<V2>): IReadBlockVariable<[V1, V2]>;
+export function seqRead<V1, V2>(
+  b1: IReadBlock<V1>,
+  b2: IReadBlock<V2>,
+): IReadBlockVariable<[V1, V2]>;
 // prettier-ignore
-export function seqRead<V1, V2, V3>(b1: IReadBlock<V1>, b2: IReadBlock<V2>, b3: IReadBlock<V3>): IReadBlockVariable<[V1, V2, V3]>;
+export function seqRead<V1, V2, V3>(
+  b1: IReadBlock<V1>,
+  b2: IReadBlock<V2>,
+  b3: IReadBlock<V3>,
+): IReadBlockVariable<[V1, V2, V3]>;
 // prettier-ignore
-export function seqRead<V1, V2, V3, V4>(b1: IReadBlock<V1>, b2: IReadBlock<V2>, b3: IReadBlock<V3>, b4: IReadBlock<V4>): IReadBlockVariable<[V1, V2, V3, V4]>;
+export function seqRead<V1, V2, V3, V4>(
+  b1: IReadBlock<V1>,
+  b2: IReadBlock<V2>,
+  b3: IReadBlock<V3>,
+  b4: IReadBlock<V4>,
+): IReadBlockVariable<[V1, V2, V3, V4]>;
 // prettier-ignore
-export function seqRead<V1, V2, V3, V4, V5>(b1: IReadBlock<V1>, b2: IReadBlock<V2>, b3: IReadBlock<V3>, b4: IReadBlock<V4>, b5: IReadBlock<V5>): IReadBlockVariable<[V1, V2, V3, V4, V5]>;
+export function seqRead<V1, V2, V3, V4, V5>(
+  b1: IReadBlock<V1>,
+  b2: IReadBlock<V2>,
+  b3: IReadBlock<V3>,
+  b4: IReadBlock<V4>,
+  b5: IReadBlock<V5>,
+): IReadBlockVariable<[V1, V2, V3, V4, V5]>;
 // prettier-ignore
-export function seqRead(...items: Array<IReadBlock<any>>): IReadBlockVariable<Array<any>>;
-export function seqRead(...items: Array<IReadBlock<any>>): IReadBlockVariable<any> {
+export function seqRead(
+  ...items: Array<IReadBlock<any>>
+): IReadBlockVariable<Array<any>>;
+export function seqRead(
+  ...items: Array<IReadBlock<any>>
+): IReadBlockVariable<any> {
   return {
     size(buf, pos) {
       let size = 0;
@@ -143,11 +179,19 @@ export function seqRead(...items: Array<IReadBlock<any>>): IReadBlockVariable<an
   };
 }
 
-export function resolveReadSize(block: IReadBlock<any>, buffer: BufferFacade, offset: number): number {
-  return typeof block.size === 'number' ? block.size : block.size(buffer, offset);
+export function resolveReadSize(
+  block: IReadBlock<any>,
+  buffer: BufferFacade,
+  offset: number,
+): number {
+  return typeof block.size === "number"
+    ? block.size
+    : block.size(buffer, offset);
 }
 
-export function dynamicRead<Value>(getBlock: (buf: BufferFacade, pos: number) => IReadBlock<Value>): IReadBlock<Value> {
+export function dynamicRead<Value>(
+  getBlock: (buf: BufferFacade, pos: number) => IReadBlock<Value>,
+): IReadBlock<Value> {
   return {
     size: (buf, pos) => resolveReadSize(getBlock(buf, pos), buf, pos),
     read: (buf, pos) => getBlock(buf, pos).read(buf, pos),
@@ -159,7 +203,7 @@ export function transformRead<Inner, Outer>(
   transform: (val: Inner) => Outer,
 ): IReadBlock<Outer> {
   const size = block.size;
-  if (typeof size === 'number') {
+  if (typeof size === "number") {
     return {
       size: size,
       read: (buf, pos) => transform(block.read(buf, pos)),
@@ -171,7 +215,10 @@ export function transformRead<Inner, Outer>(
   };
 }
 
-export function repeatRead<Value>(count: number, block: IReadBlock<Value>): IReadBlock<Array<Value>> {
+export function repeatRead<Value>(
+  count: number,
+  block: IReadBlock<Value>,
+): IReadBlock<Array<Value>> {
   return {
     size: (buf, pos) => {
       let size = 0;

@@ -1,6 +1,6 @@
 export type IWriteValue = Uint8Array | BufferFacade;
 
-const UNSAFE_ACCESS = Symbol('UNSAFE_ACCESS');
+const UNSAFE_ACCESS = Symbol("UNSAFE_ACCESS");
 
 export class BufferFacade {
   private readonly buffer: Uint8Array;
@@ -28,14 +28,16 @@ export class BufferFacade {
     return this.buffer[index];
   }
 
-  public write(content: Uint8Array | BufferFacade, offset = 0) {
+  public write(content: Uint8Array | BufferFacade, offset = 0): this {
     this.validateSelectParams(offset, content.byteLength);
-    const rawContent = content instanceof Uint8Array ? content : content[UNSAFE_ACCESS]();
+    const rawContent = content instanceof Uint8Array
+      ? content
+      : content[UNSAFE_ACCESS]();
     this.buffer.set(rawContent, offset);
     return this;
   }
 
-  public writeByte(index: number, val: number) {
+  public writeByte(index: number, val: number): this {
     if (index >= this.buffer.byteLength) {
       throw new Error(`Out of range write`);
     }
@@ -55,7 +57,9 @@ export class BufferFacade {
     }
     const end = start + length;
     if (end > this.byteLength) {
-      throw new Error(`Out of range: end (${end}) > length (${this.byteLength})`);
+      throw new Error(
+        `Out of range: end (${end}) > length (${this.byteLength})`,
+      );
     }
   }
 }
